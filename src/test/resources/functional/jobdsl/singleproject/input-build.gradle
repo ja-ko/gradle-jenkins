@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'eu.jkol.jenkins.job'
+    id 'eu.jkol.jenkins.jobdsl'
+}
+
+jenkins {
+    scm {
+        git {
+            url "fake://url"
+            enabled = true
+        }
+    }
+    invocations {
+        clean {
+            task project.clean
+        }
+        main {
+            task project.build
+        }
+    }
+    freestyleJobs {
+        testJob
+    }
+}
+
+jobdsl {
+    destination = file("jobdsl.groovy")
+}

@@ -1,0 +1,17 @@
+= jenkins gradle plugin
+
+
+Imagine a gradle multiproject with lots of projects and several static code analyzer plugins. Now try building
+these projects on a Jenkins CI. Usually you'll want a job per project to have finer control over your quality gates for
+example. After all, you created those subprojects for a reason. Maintaining all that jenkins jobs by hand would be a
+nightmare. The JobDsl Syntax provided by Jenkins partially solves these problems, but has in turn it's own set of
+problems. Maintaining the jobdsl to stay in sync with your gradle multiproject can for example be cumbersome.
+
+== How to use
+This project provides two plugins:
+
+* `eu.jkol.jenkins.job` configures how to build the project this plugin is applied to
+* `eu.jkol.jenkins.jobdsl` generates the jobdsl for every build configured by the former
+
+WORK IN PROGRESS. MORE OR LESS
+

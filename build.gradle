@@ -1,0 +1,112 @@
+
+plugins {
+    id 'groovy'
+    id 'idea'
+    id 'java-gradle-plugin'
+}
+
+group 'eu.jkol.gradle.jenkins'
+version '1.0-SNAPSHOT'
+
+ext {
+    jobDslVersion = '1.66'
+    jenkinsVersion = '2.87'
+}
+
+
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.jenkins-ci.org/public/'
+    }
+}
+
+sourceSets {
+    acceptanceTest
+}
+
+configurations {
+    acceptanceTestCompile {
+        exclude group: 'xalan'
+        exclude group: 'xerces'
+        exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+
+        extendsFrom testCompile
+    }
+    acceptanceTestRuntime {
+        extendsFrom testRuntime
+    }
+    acceptanceTestPlugins
+    all {
+        resolutionStrategy  {
+            force 'org.codehaus.groovy:groovy-all:2.4.12'
+        }
+    }
+}
+
+dependencies {
+    compile localGroovy()
+
+    testCompile 'junit:junit:4.12'
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+    testRuntime 'cglib:cglib-nodep:3.2.5'
+    testRuntime 'org.objenesis:objenesis:2.6'
+
+
+
+    acceptanceTestCompile 'org.jenkins-ci.main:jenkins-test-harness:2.31'
+    acceptanceTestCompile "org.jenkins-ci.main:jenkins-war:${jenkinsVersion}"
+
+    acceptanceTestCompile "org.jenkins-ci.plugins:job-dsl:${jobDslVersion}"
+    acceptanceTestCompile "org.jenkins-ci.plugins:job-dsl:${jobDslVersion}@jar"
+    acceptanceTestCompile 'org.jenkins-ci.plugins:structs:1.6@jar'
+
+    acceptanceTestPlugins 'org.jvnet.hudson.plugins:checkstyle:3.49'
+    acceptanceTestPlugins 'org.jenkins-ci.plugins:gradle:1.28'
+    acceptanceTestPlugins 'org.jenkins-ci.plugins:git:3.6.3'
+
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+gradlePlugin {
+    plugins {
+        jobDsl {
+            id = 'eu.jkol.jenkins.jobdsl'
+            implementationClass = 'eu.jkol.gradle.jenkins.jobdsl.JenkinsJobDslPlugin'
+        }
+        job {
+            id = 'eu.jkol.jenkins.job'
+            implementationClass = 'eu.jkol.gradle.jenkins.jobs.JenkinsJobsPlugin'
+        }
+    }
+}
+
+task resolveTestPlugins(type: Copy) {
+    from configurations.acceptanceTestPlugins
+    into new File(sourceSets.acceptanceTest.output.resourcesDir, 'test-dependencies')
+    include '*.hpi'
+    include '*.jpi'
+
+    doLast {
+        def baseNames = source.collect { it.name[0..it.name.lastIndexOf('.')-1] }
+        new File(destinationDir, 'index').setText(baseNames.join('\n'), 'UTF-8')
+    }
+}
+
+task acceptanceTest(type: Test) {
+    dependsOn resolveTestPlugins
+    outputs.dir("$buildDir/jenkins-for-test")
+
+    testClassesDirs = sourceSets.acceptanceTest.output.classesDirs
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    jvmArgs "-DbuildDirectory=$buildDir"
+}
+check.dependsOn acceptanceTest

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gradle-jenkins.iml" filepath="$PROJECT_DIR$/.idea/modules/gradle-jenkins.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gradle-jenkins_main.iml" filepath="$PROJECT_DIR$/.idea/modules/gradle-jenkins_main.iml" group="gradle-jenkins" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gradle-jenkins_test.iml" filepath="$PROJECT_DIR$/.idea/modules/gradle-jenkins_test.iml" group="gradle-jenkins" />
+    </modules>
+  </component>
+</project>
